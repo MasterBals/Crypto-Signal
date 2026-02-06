@@ -45,7 +45,7 @@ necessity: optional\
 description: This option controls how frequently to rescan the exchange information (in seconds).
 
 **market_pairs**\
-default: None\
+default: EUR/JPY\
 necessity: optional\
 description: Allows you to specify a list of market pairs you are interested in.
 
@@ -58,9 +58,9 @@ settings:
   output_mode: cli
   update_interval: 300
   market_pairs:
-    - ETH/BTC
-    - LTC/BTC
-    - XMR/BTC
+    - EUR/JPY
+    - GBP/USD
+    - USD/CHF
 ```
 
 # 3) Exchanges
