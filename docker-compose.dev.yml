@@ -4,10 +4,23 @@ services:
   app:
     build: .
     image: crypto-signal:dev
+    environment:
+      - CONFIG_PATH=/app/config/config.yml
+      - STATE_PATH=/app/config/latest.json
+      - ENABLE_WEB_INTERFACE=false
+    volumes:
+      - ./app:/app
+      - config-data:/app/config
+  web:
+    build: .
+    image: crypto-signal:web-dev
+    command: ["/usr/local/bin/python","web_server.py"]
     ports:
       - "8887:8887"
     environment:
       - CONFIG_PATH=/app/config/config.yml
+      - STATE_PATH=/app/config/latest.json
+      - ENABLE_WEB_INTERFACE=true
     volumes:
       - ./app:/app
       - config-data:/app/config

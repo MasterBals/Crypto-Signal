@@ -4,6 +4,7 @@
 """
 
 import json
+import os
 import traceback
 from copy import deepcopy
 
@@ -65,6 +66,7 @@ class Behaviour():
         new_result = self._test_strategies(market_data, output_mode)
 
         self.notifier.notify_all(new_result)
+        self._persist_latest(new_result)
         return new_result
 
 
@@ -120,6 +122,19 @@ class Behaviour():
         # Print an empty line when complete
         print()
         return new_result
+
+
+    def _persist_latest(self, latest_result):
+        state_path = os.getenv('STATE_PATH')
+        if not state_path:
+            return
+
+        try:
+            os.makedirs(os.path.dirname(state_path), exist_ok=True)
+            with open(state_path, 'w') as state_file:
+                json.dump(latest_result, state_file, default=str)
+        except Exception:
+            self.logger.exception('Failed writing state to %s', state_path)
 
 
     def _get_indicator_results(self, exchange, market_pair):

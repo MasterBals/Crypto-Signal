@@ -36,15 +36,19 @@ def main():
         exchange_interface,
         notifier
     )
-    web_interface = WebInterface(
-        settings.get('web_interface_port', 8887),
-        config_path=os.getenv('CONFIG_PATH', 'config.yml')
-    )
-    web_interface.start()
+    web_interface = None
+    if os.getenv('ENABLE_WEB_INTERFACE', 'true').lower() == 'true':
+        web_interface = WebInterface(
+            settings.get('web_interface_port', 8887),
+            config_path=os.getenv('CONFIG_PATH', 'config.yml'),
+            state_path=os.getenv('STATE_PATH')
+        )
+        web_interface.start()
 
     while True:
         latest = behaviour.run(settings['market_pairs'], settings['output_mode'])
-        web_interface.update(latest)
+        if web_interface:
+            web_interface.update(latest)
         logger.info("Sleeping for %s seconds", settings['update_interval'])
         time.sleep(settings['update_interval'])
 

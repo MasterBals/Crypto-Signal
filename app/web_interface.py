@@ -12,17 +12,19 @@ import structlog
 class WebInterface:
     """Provides a minimal HTTP server for latest analysis data."""
 
-    def __init__(self, port, config_path=None):
+    def __init__(self, port, config_path=None, state_path=None):
         self.logger = structlog.get_logger()
         self.port = port
         self.state = {'latest': None}
         self.config_path = config_path or os.getenv('CONFIG_PATH', 'config.yml')
+        self.state_path = state_path or os.getenv('STATE_PATH')
         self.server = ThreadingHTTPServer(('0.0.0.0', port), self._handler())
 
 
     def _handler(self):
         state = self.state
         config_path = self.config_path
+        state_path = self.state_path
         port = self.port
         logger = self.logger
 
@@ -38,7 +40,8 @@ class WebInterface:
                     return
 
                 if self.path == '/latest':
-                    self._send_json(state['latest'] or {'status': 'no_data'})
+                    payload = self._read_state() or state['latest'] or {'status': 'no_data'}
+                    self._send_json(payload)
                     return
 
                 if self.path == '/config':
@@ -92,6 +95,17 @@ class WebInterface:
                     logger.exception('Failed reading config at %s', config_path)
                 return ''
 
+            def _read_state(self):
+                if not state_path:
+                    return None
+                try:
+                    if os.path.isfile(state_path):
+                        with open(state_path, 'r') as state_file:
+                            return json.load(state_file)
+                except Exception:
+                    logger.exception('Failed reading state at %s', state_path)
+                return None
+
             def _write_config(self, config_body):
                 try:
                     os.makedirs(os.path.dirname(config_path), exist_ok=True)
@@ -101,7 +115,11 @@ class WebInterface:
                     logger.exception('Failed writing config at %s', config_path)
 
             def _render_page(self):
-                latest_payload = json.dumps(state['latest'] or {'status': 'no_data'}, indent=2, default=str)
+                latest_payload = json.dumps(
+                    self._read_state() or state['latest'] or {'status': 'no_data'},
+                    indent=2,
+                    default=str
+                )
                 config_body = self._read_config()
                 return f"""<!doctype html>
 <html lang="en">
