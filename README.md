@@ -20,7 +20,7 @@ frontend: Nginx + statische Web-App. Frontend ruft das Backend über /api/ auf.
 Anpassung
 API-Endpunkt: Im UI-Feld „API Endpoint“ kann der Request-Pfad angepasst werden.
 
-Backend-Branch: In docker-compose.yml kann CRYPTOSIGNAL_REF (z. B. main) gesetzt werden.
+Backend-Branch: In docker-compose.yml kann CRYPTOSIGNAL_REF (z. B. master) gesetzt werden.
 
 Wenn das Backend noch keine Signale liefert, zeigt das UI Demo-Signale an.
 

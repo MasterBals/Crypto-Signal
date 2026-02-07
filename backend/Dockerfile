@@ -9,7 +9,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends curl build-essential \
   && rm -rf /var/lib/apt/lists/*
 
-ARG CRYPTOSIGNAL_REF=main
+ARG CRYPTOSIGNAL_REF=master
 
 RUN curl -fsSL "https://github.com/CryptoSignal/Crypto-Signal/archive/refs/heads/${CRYPTOSIGNAL_REF}.zip" -o /tmp/crypto-signal.zip \
   && python -m zipfile -e /tmp/crypto-signal.zip /tmp \
