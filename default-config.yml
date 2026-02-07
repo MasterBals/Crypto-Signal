@@ -4,9 +4,9 @@
 settings:
   update_interval: 300
   market_pairs:
-    - ETH/BTC
-    - LTC/BTC
-    - XMR/BTC
+    - EUR/JPY
+    - GBP/USD
+    - USD/CHF
 
 exchanges:
   bittrex:
