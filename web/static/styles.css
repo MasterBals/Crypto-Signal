@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+header {
+  padding: 24px 32px;
+  background: #111827;
+  border-bottom: 1px solid #1f2937;
+}
+
+h1 {
+  margin: 0 0 12px 0;
+  font-size: 28px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.indicator.idle {
+  background: #64748b;
+}
+
+.indicator.ok {
+  background: #22c55e;
+}
+
+.indicator.error {
+  background: #ef4444;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+button {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+main {
+  padding: 24px 32px;
+}
+
+.panel {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.empty {
+  padding: 16px;
+  color: #94a3b8;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.hidden {
+  display: none;
+}
+
+footer {
+  padding: 16px 32px;
+  color: #94a3b8;
+  border-top: 1px solid #1f2937;
+}
