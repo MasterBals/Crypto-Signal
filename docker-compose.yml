@@ -1,20 +1,26 @@
-version: '3'
+version: "3.9"
 
 services:
   backend:
-    build: .
-    command: ["/usr/local/bin/python", "backend_server.py"]
-    volumes:
-      - ./config.yml:/app/config.yml
+    build:
+      context: ./backend
+      args:
+        CRYPTOSIGNAL_REF: "main"
+    container_name: crypto-signal-backend
     ports:
       - "8886:8886"
+    environment:
+      TZ: "UTC"
+    restart: unless-stopped
 
-  web:
-    image: nginx:1.25-alpine
+  frontend:
+    build:
+      context: ./frontend
+    container_name: crypto-signal-frontend
     ports:
-      - "8887:8887"
-    volumes:
-      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./web/static:/usr/share/nginx/html:ro
+      - "8080:80"
+    environment:
+      BACKEND_BASE_URL: "http://backend:8886"
     depends_on:
       - backend
+    restart: unless-stopped
