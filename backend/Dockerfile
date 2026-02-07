@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.6-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends curl build-essential \
+  && apt-get install -y --no-install-recommends curl build-essential libta-lib0 libta-lib-dev \
   && rm -rf /var/lib/apt/lists/*
 
 ARG CRYPTOSIGNAL_REF=master
