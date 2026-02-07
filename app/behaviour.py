@@ -12,6 +12,7 @@ from ccxt import ExchangeError
 from tenacity import RetryError
 
 from analysis import StrategyAnalyzer
+from decision_engine import DecisionEngine
 from outputs import Output
 
 class Behaviour():
@@ -36,6 +37,7 @@ class Behaviour():
         self.exchange_interface = exchange_interface
         self.strategy_analyzer = StrategyAnalyzer()
         self.notifier = notifier
+        self.decision_engine = DecisionEngine(exchange_interface)
 
         output_interface = Output()
         self.output = output_interface.dispatcher
@@ -63,6 +65,7 @@ class Behaviour():
         new_result = self._test_strategies(market_data, output_mode)
 
         self.notifier.notify_all(new_result)
+        return new_result
 
 
     def _test_strategies(self, market_data, output_mode):
@@ -96,6 +99,13 @@ class Behaviour():
 
                 new_result[exchange][market_pair]['crossovers'] = self._get_crossover_results(
                     new_result[exchange][market_pair]
+                )
+
+                new_result[exchange][market_pair]['decision'] = self.decision_engine.evaluate(
+                    exchange,
+                    market_pair,
+                    new_result[exchange][market_pair]['indicators'],
+                    new_result[exchange][market_pair]['informants']
                 )
 
                 if output_mode in self.output:

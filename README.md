@@ -44,6 +44,8 @@ The commands listed below are intended to be run in a terminal.
 
 1. In a terminal run the application. `docker run --rm -v $PWD/config.yml:/app/config.yml shadowreaver/crypto-signal:master`.
 
+1. The web interface is available on port `8887` and provides the latest analysis plus a config editor when enabled in your stack.
+
 1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
 
 ### Configuring config.yml

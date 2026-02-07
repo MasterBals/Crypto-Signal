@@ -36,9 +36,26 @@ class Output():
         normal_colour = '\u001b[0m'
         hot_colour = '\u001b[31m'
         cold_colour = '\u001b[36m'
+        buy_colour = '\u001b[32m'
 
         output = "{}:\t\n".format(market_pair)
+        decision = results.get('decision')
+        if decision and decision.get('signal'):
+            signal = decision['signal']
+            colour_code = buy_colour if signal == 'buy' else hot_colour
+            output += "{}decision: {} (confidence: {}%, timeframe: {}, scenario: {}, zone: {}){} \n".format(
+                colour_code,
+                signal,
+                decision.get('confidence', 0),
+                decision.get('timeframe', 'n/a'),
+                decision.get('scenario', 'n/a'),
+                decision.get('zone', 'n/a'),
+                normal_colour
+            )
+        output += "\n"
         for indicator_type in results:
+            if indicator_type == 'decision':
+                continue
             output += '\n{}:\t'.format(indicator_type)
             for indicator in results[indicator_type]:
                 for i, analysis in enumerate(results[indicator_type][indicator]):
@@ -120,6 +137,8 @@ class Output():
 
         output = str()
         for indicator_type in results:
+            if indicator_type == 'decision':
+                continue
             for indicator in results[indicator_type]:
                 for i, analysis in enumerate(results[indicator_type][indicator]):
                     value = str()
@@ -189,6 +208,8 @@ class Output():
         logger.warn('WARNING: JSON output is deprecated and will be removed in a future version')
 
         for indicator_type in results:
+            if indicator_type == 'decision':
+                continue
             for indicator in results[indicator_type]:
                 for index, analysis in enumerate(results[indicator_type][indicator]):
                     results[indicator_type][indicator][index]['result'] = analysis['result'].to_dict(

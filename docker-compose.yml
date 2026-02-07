@@ -3,5 +3,12 @@ version: '3'
 services:
   app:
     image: shadowreaver/crypto-signal:master
+    ports:
+      - "8887:8887"
+    environment:
+      - CONFIG_PATH=/app/config/config.yml
     volumes:
-      - ./config.yml:/app/config.yml
+      - config-data:/app/config
+
+volumes:
+  config-data:

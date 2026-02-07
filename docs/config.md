@@ -44,8 +44,13 @@ default: 300\
 necessity: optional\
 description: This option controls how frequently to rescan the exchange information (in seconds).
 
+**web_interface_port**\
+default: 8887\
+necessity: optional\
+description: Sets the port for the built-in web interface that serves the latest analysis results.
+
 **market_pairs**\
-default: None\
+default: EUR/JPY\
 necessity: optional\
 description: Allows you to specify a list of market pairs you are interested in.
 
@@ -57,10 +62,11 @@ settings:
   log_level: INFO
   output_mode: cli
   update_interval: 300
+  web_interface_port: 8887
   market_pairs:
-    - ETH/BTC
-    - LTC/BTC
-    - XMR/BTC
+    - EUR/JPY
+    - GBP/USD
+    - USD/CHF
 ```
 
 # 3) Exchanges

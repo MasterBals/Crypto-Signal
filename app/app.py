@@ -4,6 +4,7 @@
 
 import time
 import sys
+import os
 
 import logs
 import conf
@@ -13,6 +14,7 @@ from conf import Configuration
 from exchange import ExchangeInterface
 from notification import Notifier
 from behaviour import Behaviour
+from web_interface import WebInterface
 
 def main():
     """Initializes the application
@@ -34,9 +36,15 @@ def main():
         exchange_interface,
         notifier
     )
+    web_interface = WebInterface(
+        settings.get('web_interface_port', 8887),
+        config_path=os.getenv('CONFIG_PATH', 'config.yml')
+    )
+    web_interface.start()
 
     while True:
-        behaviour.run(settings['market_pairs'], settings['output_mode'])
+        latest = behaviour.run(settings['market_pairs'], settings['output_mode'])
+        web_interface.update(latest)
         logger.info("Sleeping for %s seconds", settings['update_interval'])
         time.sleep(settings['update_interval'])
 

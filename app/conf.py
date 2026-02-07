@@ -17,8 +17,10 @@ class Configuration():
         with open('defaults.yml', 'r') as config_file:
             default_config = yaml.load(config_file)
 
-        if os.path.isfile('config.yml'):
-            with open('config.yml', 'r') as config_file:
+        config_path = os.getenv('CONFIG_PATH', 'config.yml')
+
+        if os.path.isfile(config_path):
+            with open(config_path, 'r') as config_file:
                 user_config = yaml.load(config_file)
         else:
             user_config = dict()

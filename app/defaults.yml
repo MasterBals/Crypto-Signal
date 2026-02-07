@@ -7,7 +7,9 @@ settings:
   log_level: INFO
   output_mode: cli
   update_interval: 300
-  market_pairs: null
+  web_interface_port: 8887
+  market_pairs:
+    - EUR/JPY
 
 exchanges: null
 
