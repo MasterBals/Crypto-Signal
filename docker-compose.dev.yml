@@ -3,6 +3,7 @@ version: '3'
 services:
   app:
     image: shadowreaver/crypto-signal:master
+    command: ["/usr/local/bin/python","app/app.py"]
     environment:
       - CONFIG_PATH=/app/config/config.yml
       - STATE_PATH=/app/config/latest.json
@@ -12,7 +13,7 @@ services:
       - config-data:/app/config
   web:
     image: shadowreaver/crypto-signal:master
-    command: ["/usr/local/bin/python","web_server.py"]
+    command: ["/usr/local/bin/python","app/web_server.py"]
     ports:
       - "8887:8887"
     environment:
