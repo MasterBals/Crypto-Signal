@@ -3,12 +3,13 @@ version: "3.9"
 services:
   backend:
     build:
-      context: https://github.com/CryptoSignal/Crypto-Signal.git
+      context: ./backend
+      args:
+        CRYPTOSIGNAL_REF: "main"
     container_name: crypto-signal-backend
-    ports:
-      - "8886:8886"
     environment:
       TZ: "UTC"
+    # Kein 'ports' Eintrag mehr: Backend ist nur intern erreichbar
     restart: unless-stopped
 
   frontend:
@@ -16,7 +17,7 @@ services:
       context: ./frontend
     container_name: crypto-signal-frontend
     ports:
-      - "8080:80"
+      - "8887:80"
     environment:
       BACKEND_BASE_URL: "http://backend:8886"
     depends_on:
