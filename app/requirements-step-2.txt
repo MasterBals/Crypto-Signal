@@ -14,3 +14,8 @@ jinja2==2.10
 requests==2.18.4
 PyYAML==3.12
 tulipy==0.2.1
+Flask==1.1.4
+Werkzeug==1.0.1
+itsdangerous==1.1.0
+click==7.1.2
+MarkupSafe==2.0.1

@@ -1,8 +1,21 @@
 version: '3'
 
 services:
-  app:
-    image: shadowreaver/crypto-signal:latest
+  backend:
+    build: .
+    command: ["/usr/local/bin/python", "backend_server.py"]
     volumes:
       - ./app:/app
       - ./config.yml:/app/config.yml
+    ports:
+      - "8886:8886"
+
+  web:
+    image: nginx:1.25-alpine
+    ports:
+      - "8887:8887"
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web/static:/usr/share/nginx/html:ro
+    depends_on:
+      - backend

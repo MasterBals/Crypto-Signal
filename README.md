@@ -46,6 +46,23 @@ The commands listed below are intended to be run in a terminal.
 
 1. When you want to update the application run `docker pull shadowreaver/crypto-signal:master`
 
+## Web Dashboard (Backend + UI)
+
+This repo now ships a simple web dashboard that talks to a backend API. The backend container runs the Crypto Signal analysis and exposes JSON results, while the web container serves a UI on port `8887`.
+
+1. Ensure `config.yml` exists in the repo root (see docs/config.md).
+2. Start the backend + web UI:
+   ```
+   docker compose up --build
+   ```
+3. Open the UI at http://localhost:8887
+
+The backend API is available at:
+
+- `GET /api/health`
+- `GET /api/results`
+- `POST /api/run`
+
 ### Configuring config.yml
 
 For a list of all possible options for config.yml and some example configurations look [here](docs/config.md)

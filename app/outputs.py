@@ -18,7 +18,8 @@ class Output():
         self.dispatcher = {
             'cli': self.to_cli,
             'csv': self.to_csv,
-            'json': self.to_json
+            'json': self.to_json,
+            'none': self.to_none
         }
 
 
@@ -220,3 +221,7 @@ class Output():
         output = json.dumps(formatted_results)
         output += '\n'
         return output
+
+    def to_none(self, results, market_pair):
+        """No-op output mode for programmatic usage."""
+        return ""
