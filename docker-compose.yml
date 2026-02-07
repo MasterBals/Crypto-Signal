@@ -7,10 +7,10 @@ services:
       args:
         CRYPTOSIGNAL_REF: "main"
     container_name: crypto-signal-backend
-    ports:
-      - "8886:8886"
     environment:
       TZ: "UTC"
+    expose:
+      - "8886"
     restart: unless-stopped
 
   frontend:
@@ -18,7 +18,7 @@ services:
       context: ./frontend
     container_name: crypto-signal-frontend
     ports:
-      - "8080:80"
+      - "8887:80"
     environment:
       BACKEND_BASE_URL: "http://backend:8886"
     depends_on:

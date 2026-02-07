@@ -12,7 +12,7 @@ Dieses Repo stellt ein Docker-Compose Setup bereit, das:
 docker compose up --build
 ```
 
-Danach ist das Frontend unter `http://localhost:8080` erreichbar. Das Backend läuft auf `http://localhost:8886`.
+Danach ist das Frontend unter `http://localhost:8887` erreichbar. Das Backend läuft intern auf `http://backend:8886`.
 
 ## Architektur
 
