@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       args:
-        CRYPTOSIGNAL_REF: "main"
+        CRYPTOSIGNAL_REF: "master"
     container_name: crypto-signal-backend
     environment:
       TZ: "UTC"
