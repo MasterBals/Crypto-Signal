@@ -2,7 +2,7 @@ version: '3'
 
 services:
   app:
-    image: masterbals/crypto-signal:master
+    image: masterbals/crypto-signal:latest
     command: ["/usr/local/bin/python","app/app.py"]
     environment:
       - CONFIG_PATH=/app/config/config.yml
@@ -12,7 +12,7 @@ services:
       - .:/app
       - config-data:/app/config
   web:
-    image: masterbals/crypto-signal:master
+    image: masterbals/crypto-signal:latest
     command: ["/usr/local/bin/python","app/web_server.py"]
     ports:
       - "8887:8887"
