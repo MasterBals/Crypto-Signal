@@ -9,8 +9,7 @@ services:
     container_name: crypto-signal-backend
     environment:
       TZ: "UTC"
-    expose:
-      - "8886"
+    # Kein 'ports' Eintrag mehr: Backend ist nur intern erreichbar
     restart: unless-stopped
 
   frontend:
