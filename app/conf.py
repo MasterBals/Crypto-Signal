@@ -14,7 +14,8 @@ class Configuration():
         """Initializes the Configuration class
         """
 
-        with open('defaults.yml', 'r') as config_file:
+        defaults_path = os.path.join(os.path.dirname(__file__), 'defaults.yml')
+        with open(defaults_path, 'r') as config_file:
             default_config = yaml.load(config_file)
 
         config_path = os.getenv('CONFIG_PATH', 'config.yml')
