@@ -8,7 +8,7 @@ services:
       - STATE_PATH=/app/config/latest.json
       - ENABLE_WEB_INTERFACE=false
     volumes:
-      - ./app:/app
+      - .:/app
       - config-data:/app/config
   web:
     image: shadowreaver/crypto-signal:master
@@ -20,7 +20,7 @@ services:
       - STATE_PATH=/app/config/latest.json
       - ENABLE_WEB_INTERFACE=true
     volumes:
-      - ./app:/app
+      - .:/app
       - config-data:/app/config
 
 volumes:
