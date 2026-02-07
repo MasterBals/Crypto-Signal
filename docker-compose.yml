@@ -1,7 +1,17 @@
 version: '3'
 
 services:
-  app:
-    image: shadowreaver/crypto-signal:master
+  backend:
+    build: .
+    command: ["/usr/local/bin/python", "backend_server.py"]
     volumes:
       - ./config.yml:/app/config.yml
+    ports:
+      - "8886:8886"
+
+  web:
+    build: ./web
+    ports:
+      - "8887:8887"
+    depends_on:
+      - backend
