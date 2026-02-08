@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>EUR/JPY AI Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="title">EUR/JPY AI Dashboard</div>
+        <div class="subtitle">Decision Support: Technik + News-Sentiment, lokal und kostenfrei</div>
+      </div>
+      <div class="status">
+        <a class="pill link" href="/config">Konfiguration</a>
+        <div class="pill" id="updated">Update: ...</div>
+        <div class="pill" id="price">Preis: ...</div>
+      </div>
+    </header>
+    <main class="grid">
+      <section class="card chart">
+        <div class="card-head">
+          <div class="h">Chart</div>
+          <div class="s" id="meta">...</div>
+        </div>
+        <div id="chart"></div>
+      </section>
+
+      <section class="card signal">
+        <div class="card-head">
+          <div class="h">Signal</div>
+          <div class="s">Buy/Sell Limit Vorschlag inkl. Reserve-SL</div>
+        </div>
+        <div class="signal-row">
+          <div class="badge" id="action">...</div>
+          <div class="confidence">
+            Confidence: <span id="confidence">...</span> | Erfolgschance: <span id="success">...</span>
+          </div>
+        </div>
+        <div class="kv">
+          <div class="k">Entry</div>
+          <div class="v" id="entry">...</div>
+          <div class="k">Stop-Loss</div>
+          <div class="v" id="sl">...</div>
+          <div class="k">Take-Profit</div>
+          <div class="v" id="tp">...</div>
+          <div class="k">Score</div>
+          <div class="v" id="score">...</div>
+          <div class="k">Entry ETA</div>
+          <div class="v" id="entry-eta">...</div>
+          <div class="k">TP ETA</div>
+          <div class="v" id="tp-eta">...</div>
+        </div>
+        <div class="reason" id="reason">...</div>
+      </section>
+
+      <section class="card indicators">
+        <div class="card-head">
+          <div class="h">Indikatoren</div>
+          <div class="s">RSI, MACD, EMA, ATR</div>
+        </div>
+        <div class="kv">
+          <div class="k">RSI(14)</div>
+          <div class="v" id="rsi">...</div>
+          <div class="k">EMA20</div>
+          <div class="v" id="ema20">...</div>
+          <div class="k">EMA50</div>
+          <div class="v" id="ema50">...</div>
+          <div class="k">MACD Hist</div>
+          <div class="v" id="macdh">...</div>
+          <div class="k">ATR(14)</div>
+          <div class="v" id="atr">...</div>
+        </div>
+        <div class="tv" id="tv">TradingView-TA: ...</div>
+      </section>
+
+      <section class="card news">
+        <div class="card-head">
+          <div class="h">News</div>
+          <div class="s">RSS Quellen, lokales Sentiment</div>
+        </div>
+        <div id="news"></div>
+      </section>
+    </main>
+    <footer class="footer">
+      Auto-Refresh: <span id="refresh">300</span>s | Keine Anlageberatung, keine Order-Ausfuehrung
+    </footer>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
