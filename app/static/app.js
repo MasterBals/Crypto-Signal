@@ -1,4 +1,5 @@
-const REFRESH_SECONDS = 300;
+let refreshSeconds = 300;
+let refreshTimer = null;
 
 function fmtTs(epoch) {
   const d = new Date(epoch * 1000);
@@ -60,6 +61,18 @@ function renderNews(items) {
     .join("");
 }
 
+function updateRefresh(seconds) {
+  if (!seconds || Number.isNaN(Number(seconds))) return;
+  const next = Number(seconds);
+  if (next <= 0 || next === refreshSeconds) return;
+  refreshSeconds = next;
+  document.getElementById("refresh").textContent = `${refreshSeconds}`;
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+  }
+  refreshTimer = setInterval(tick, refreshSeconds * 1000);
+}
+
 async function fetchState() {
   const r = await fetch("/api/state", { cache: "no-store" });
   if (!r.ok) throw new Error("API Fehler");
@@ -71,7 +84,9 @@ function renderState(s) {
   document.getElementById("price").textContent = `Preis: ${s.market.price}`;
 
   document.getElementById("meta").textContent = `${s.meta.pair} | Interval: ${s.meta.interval}`;
-  document.getElementById("refresh").textContent = `${REFRESH_SECONDS}`;
+  document.getElementById("refresh").textContent = `${s.meta.refresh_seconds}`;
+
+  updateRefresh(s.meta.refresh_seconds);
 
   const sig = s.signal;
   setBadge(document.getElementById("action"), sig.action);
@@ -115,5 +130,5 @@ async function tick() {
 window.addEventListener("DOMContentLoaded", async () => {
   initChart();
   await tick();
-  setInterval(tick, REFRESH_SECONDS * 1000);
+  refreshTimer = setInterval(tick, refreshSeconds * 1000);
 });

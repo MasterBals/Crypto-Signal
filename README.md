@@ -7,6 +7,7 @@ Dieses Projekt stellt ein lokales Dashboard bereit, das sich ausschliesslich auf
 - Signal-Engine: BUY LIMIT, SELL LIMIT, NEUTRAL inkl. Entry, SL, TP, Confidence und Begruendung
 - Auto-Refresh im Browser (standardmaessig alle 5 Minuten)
 - Backend Cache + Hintergrund-Update (Scheduler) zur Stabilitaet
+- Konfigurationsseite mit persistierten Einstellungen
 
 ## Start (Docker)
 ```bash
@@ -15,7 +16,11 @@ docker compose up --build
 
 Danach im Browser:
 
-http://localhost:8000
+http://localhost:8887
+
+Konfiguration:
+
+http://localhost:8887/config
 
 Hinweise
 Kostenfrei: Keine API-Keys notwendig.

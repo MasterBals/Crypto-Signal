@@ -3,5 +3,7 @@ services:
   eurjpy-dashboard:
     build: .
     ports:
-      - "8000:8000"
+      - "8887:8887"
+    volumes:
+      - ./data:/app/data
     restart: unless-stopped

@@ -56,6 +56,7 @@ def refresh_state() -> dict[str, Any]:
         "meta": {
             "pair": "EUR/JPY",
             "interval": settings.candle_interval,
+            "refresh_seconds": settings.refresh_seconds,
         },
         "chart": {
             "candles": _df_to_candles(df),
