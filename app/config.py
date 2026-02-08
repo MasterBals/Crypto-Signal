@@ -12,6 +12,7 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "symbol": "EURJPY=X",
         "conversion_symbol": "USDJPY=X",
         "display_currency": "USD",
+        "source": "yfinance",
         "news_keywords": [
             "eur",
             "euro",
@@ -41,6 +42,8 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "symbol": "ETH-USD",
         "conversion_symbol": None,
         "display_currency": "USD",
+        "source": "coinbase",
+        "product_id": "ETH-USD",
         "news_keywords": [
             "eth",
             "ethereum",
@@ -60,6 +63,8 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "symbol": "BTC-USD",
         "conversion_symbol": None,
         "display_currency": "USD",
+        "source": "coinbase",
+        "product_id": "BTC-USD",
         "news_keywords": [
             "btc",
             "bitcoin",

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+import requests
 
 import pandas as pd
 import yfinance as yf
@@ -44,6 +45,49 @@ def _download(symbol: str) -> pd.DataFrame:
     return df.dropna(subset=["Open", "High", "Low", "Close"]).copy()
 
 
+def _granularity_seconds() -> int:
+    interval = settings.candle_interval
+    allowed = [60, 300, 900, 3600, 21600, 86400]
+    if interval.endswith("m"):
+        minutes = int(interval.replace("m", ""))
+        target = minutes * 60
+    elif interval.endswith("h"):
+        hours = int(interval.replace("h", ""))
+        target = hours * 3600
+    else:
+        target = 900
+    return min(allowed, key=lambda x: abs(x - target))
+
+
+def _download_coinbase(product_id: str) -> pd.DataFrame:
+    granularity = _granularity_seconds()
+    end = pd.Timestamp.utcnow()
+    start = end - pd.Timedelta(days=settings.history_days)
+    url = f"https://api.exchange.coinbase.com/products/{product_id}/candles"
+    params = {
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "granularity": granularity,
+    }
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    if not data:
+        raise RuntimeError(f"Keine Coinbase-Daten fuer {product_id} erhalten.")
+    df = pd.DataFrame(data, columns=["time", "low", "high", "open", "close", "volume"])
+    df["time"] = pd.to_datetime(df["time"], unit="s", utc=True)
+    df = df.sort_values("time").set_index("time")
+    return df.rename(
+        columns={
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "volume": "Volume",
+        }
+    )
+
+
 def _convert_to_usd(base_df: pd.DataFrame, fx_df: pd.DataFrame) -> pd.DataFrame:
     joined = base_df.join(fx_df[["Close"]].rename(columns={"Close": "fx"}), how="inner")
     if joined.empty:
@@ -59,12 +103,15 @@ def get_candles() -> pd.DataFrame:
     since_ts = int((pd.Timestamp.utcnow() - pd.Timedelta(days=settings.history_days)).timestamp())
 
     try:
-        base_df = _download(instrument["symbol"])
-        conversion_symbol = instrument.get("conversion_symbol")
-        if instrument["display_currency"].upper() == "USD" and conversion_symbol:
-            fx_df = _download(conversion_symbol)
-            base_df = _convert_to_usd(base_df, fx_df)
-            symbol_label = f"{instrument['symbol']}_USD"
+        if instrument.get("source") == "coinbase":
+            base_df = _download_coinbase(instrument["product_id"])
+        else:
+            base_df = _download(instrument["symbol"])
+            conversion_symbol = instrument.get("conversion_symbol")
+            if instrument["display_currency"].upper() == "USD" and conversion_symbol:
+                fx_df = _download(conversion_symbol)
+                base_df = _convert_to_usd(base_df, fx_df)
+                symbol_label = f"{instrument['symbol']}_USD"
         upsert_candles(symbol_label, base_df)
     except Exception:
         pass

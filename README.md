@@ -26,7 +26,7 @@ http://localhost:8887/config
 Hinweise
 Kostenfrei: Keine API-Keys notwendig.
 
-Datenquellen: yfinance (historische und aktuelle Kurse), RSS (News), optional TradingView TA (Sekundaerquelle fuer "Market Summary").
+Datenquellen: yfinance (FX/Index), Coinbase Exchange API (Crypto, kostenlos), RSS (News), optional TradingView TA (Sekundaerquelle fuer "Market Summary").
 
 Waehrung: Standardmaessig werden EUR/JPY Kurse in USD umgerechnet (via USDJPY=X) und in USD angezeigt. Anpassung ueber die Konfiguration moeglich.
 
