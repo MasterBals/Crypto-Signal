@@ -87,6 +87,7 @@ def get_state() -> dict[str, Any]:
         try:
             return refresh_state()
         except Exception as exc:
+            instrument = get_instrument()
             if cached:
                 cached["meta"]["error"] = str(exc)
                 return cached
@@ -108,7 +109,7 @@ def get_state() -> dict[str, Any]:
                 "indicators": {},
                 "news": [],
                 "meta": {
-                    "pair": "EUR/JPY",
+                    "pair": instrument.get("label", "EUR/JPY"),
                     "interval": settings.candle_interval,
                     "refresh_seconds": settings.refresh_seconds,
                     "display_currency": instrument["display_currency"],
