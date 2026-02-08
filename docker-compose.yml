@@ -1,25 +1,7 @@
 version: "3.9"
-
 services:
-  backend:
-    build:
-      context: ./backend
-      args:
-        CRYPTOSIGNAL_REF: "master"
-    container_name: crypto-signal-backend
-    environment:
-      TZ: "UTC"
-    # Kein 'ports' Eintrag mehr: Backend ist nur intern erreichbar
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-    container_name: crypto-signal-frontend
+  eurjpy-dashboard:
+    build: .
     ports:
-      - "8887:80"
-    environment:
-      BACKEND_BASE_URL: "http://backend:8886"
-    depends_on:
-      - backend
+      - "8000:8000"
     restart: unless-stopped

@@ -1,32 +1,25 @@
-Forex Signal Cockpit
-Dieses Repo stellt ein Docker-Compose Setup bereit, das:
+# EUR/JPY AI Dashboard (Decision Support)
 
-den Crypto-Signal Backend-Container direkt aus dem GitHub-Repo lädt (ohne git im Build),
+Dieses Projekt stellt ein lokales Dashboard bereit, das sich ausschliesslich auf EUR/JPY fokussiert:
+- Candlestick-Chart (TradingView Lightweight Charts)
+- Technische Indikatoren (RSI, MACD, EMA20/EMA50, ATR)
+- News via RSS + lokales Sentiment (VADER)
+- Signal-Engine: BUY LIMIT, SELL LIMIT, NEUTRAL inkl. Entry, SL, TP, Confidence und Begruendung
+- Auto-Refresh im Browser (standardmaessig alle 5 Minuten)
+- Backend Cache + Hintergrund-Update (Scheduler) zur Stabilitaet
 
-ein Frontend als separaten Container bereitstellt,
-
-eine benutzerfreundliche Oberfläche für Forex-Setups inkl. Buy/Sell Empfehlungen bietet.
-
-Schnellstart
-Bash
+## Start (Docker)
+```bash
 docker compose up --build
-Danach ist das Frontend unter http://localhost:8887 erreichbar. Das Backend läuft intern auf http://backend:8886.
+```
 
-Architektur
-backend: Wird über ein Dockerfile gebaut, das den Upstream als ZIP lädt.
+Danach im Browser:
 
-frontend: Nginx + statische Web-App. Frontend ruft das Backend über /api/ auf.
+http://localhost:8000
 
-Anpassung
-API-Endpunkt: Im UI-Feld „API Endpoint“ kann der Request-Pfad angepasst werden.
+Hinweise
+Kostenfrei: Keine API-Keys notwendig.
 
-Backend-Branch: In docker-compose.yml kann CRYPTOSIGNAL_REF (z. B. master) gesetzt werden.
+Datenquellen: yfinance (historische und aktuelle Kurse), RSS (News), optional TradingView TA (Sekundaerquelle fuer "Market Summary").
 
-Wenn das Backend noch keine Signale liefert, zeigt das UI Demo-Signale an.
-
-Hinweis zu Build-Umgebungen ohne git
-Der Backend-Build lädt den Upstream als ZIP, damit kein git auf dem Build-Host benötigt wird. Wenn dennoch ein Fehler wie „git: executable file not found in $PATH“ auftaucht, bitte sicherstellen,
-
-dass die aktuelle docker-compose.yml aus diesem Repo genutzt wird,
-
-und die Build-Cache/Builder-Instanz neu erstellt wird, falls Docker eine alte Git-Quelle cached.
+Decision Support: Keine Broker-Anbindung, keine Order-Ausfuehrung.
