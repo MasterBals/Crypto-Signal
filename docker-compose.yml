@@ -1,9 +1,24 @@
 version: "3.9"
+
 services:
-  eurjpy-dashboard:
-    build: .
-    ports:
-      - "8887:8887"
+  app:
+    image: python:3.11-slim
+    container_name: trading-ai-app
     volumes:
-      - ./data:/app/data
+      - ./app:/app
+      - ./config:/config
+      - ./data:/data
+    working_dir: /app
+    command: ["python", "main.py"]
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama
+    container_name: trading-ai-ollama
+    volumes:
+      - ./ollama:/root/.ollama
+    ports:
+      - "11434:11434"
     restart: unless-stopped

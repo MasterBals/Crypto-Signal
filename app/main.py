@@ -1,70 +1,93 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
 
-from app.config import INSTRUMENTS, get_settings, update_settings
-from app.services.db import init_db
-from app.services.state_cache import get_state, start_scheduler
-from app.services.backup import create_backup
+import yaml
 
-app = FastAPI(title="EUR/JPY AI Dashboard", version="1.0.0")
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    init_db()
-    start_scheduler()
+from app.decision.validator import validate_decision
+from app.features.indicators import compute_indicators
+from app.features.market_structure import analyze_market_structure
+from app.features.resample import resample_market_data
+from app.llm.ollama_client import call_ollama
+from app.llm.prompts import build_prompt
+from app.output.writer import SignalWriter
+from app.provider.alphavantage import fetch_market_data
+from app.scheduler import Scheduler
+from app.state.trade_counter import TradeCounter
+from app.utils.logging import setup_logger
+from app.utils.time import now_in_tz
 
 
-@app.get("/", response_class=HTMLResponse)
-def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request})
+def load_config(path: str = "/config/config.yaml") -> dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle)
 
 
-@app.get("/config", response_class=HTMLResponse)
-def config_page(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("config.html", {"request": request})
+def hash_payload(payload: dict[str, Any]) -> str:
+    encoded = json.dumps(payload, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
-@app.get("/api/state", response_class=JSONResponse)
-def api_state() -> JSONResponse:
-    return JSONResponse(get_state())
+def build_llm_input(config: dict[str, Any], features: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "symbol": config["general"]["symbol"],
+        "interval": config["alphavantage"]["interval"],
+        "market_state": {
+            "trend": features["trend"],
+            "rsi": features["rsi"],
+            "atr": features["atr"],
+        },
+        "levels": {
+            "support": features["support"],
+            "resistance": features["resistance"],
+        },
+        "risk": {
+            "min_rr": config["risk"]["min_rr"],
+            "sl_atr_factor": config["risk"]["sl_atr_factor"],
+            "max_trades_per_day": config["risk"]["max_trades_per_day"],
+        },
+    }
 
 
-@app.get("/api/settings", response_class=JSONResponse)
-def api_settings() -> JSONResponse:
-    settings = get_settings()
-    return JSONResponse(settings.to_dict())
+def main() -> None:
+    config = load_config()
+    logger = setup_logger()
+    trade_counter = TradeCounter(timezone=config["general"]["timezone"])
+    writer = SignalWriter()
 
+    def on_tick() -> None:
+        market_data = fetch_market_data(config, logger)
+        if market_data is None:
+            return
 
-@app.post("/api/settings", response_class=JSONResponse)
-def api_update_settings(payload: dict) -> JSONResponse:
-    settings = update_settings(payload)
-    return JSONResponse(settings.to_dict())
+        resampled = resample_market_data(market_data, config["alphavantage"]["interval"])
+        indicators = compute_indicators(resampled, config)
+        structure = analyze_market_structure(resampled)
+        features = {**indicators, **structure}
 
+        llm_input = build_llm_input(config, features)
+        prompt = build_prompt(llm_input)
+        llm_output = call_ollama(config["llm"]["model"], config["llm"]["temperature"], prompt)
 
-@app.get("/api/instruments", response_class=JSONResponse)
-def api_instruments() -> JSONResponse:
-    instruments = [
-        {
-            "key": key,
-            "label": value["label"],
-            "display_currency": value["display_currency"],
+        final_decision = validate_decision(llm_output, llm_input["market_state"], config, trade_counter)
+
+        payload = {
+            "raw_hash": hash_payload(market_data),
+            "feature_snapshot": features,
+            "llm_input": llm_input,
+            "llm_output": llm_output,
+            "final_decision": final_decision,
         }
-        for key, value in INSTRUMENTS.items()
-    ]
-    return JSONResponse({"items": instruments})
+
+        now = now_in_tz(config["general"]["timezone"])
+        writer.write(payload, config["general"]["symbol"], config["alphavantage"]["interval"], now)
+
+    scheduler = Scheduler(config=config, logger=logger, on_tick=on_tick)
+    scheduler.run()
 
 
-@app.get("/api/backup", response_class=FileResponse)
-def api_backup() -> FileResponse:
-    backup_path = create_backup()
-    filename = backup_path.name
-    return FileResponse(path=str(backup_path), filename=filename)
+if __name__ == "__main__":
+    main()
