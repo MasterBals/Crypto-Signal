@@ -6,6 +6,11 @@ function fmtTs(epoch) {
   return d.toLocaleString();
 }
 
+function fmtHours(value) {
+  if (value === null || value === undefined) return "-";
+  return `${value}h`;
+}
+
 function clsSent(x) {
   if (x >= 0.15) return "sent-pos";
   if (x <= -0.15) return "sent-neg";
@@ -80,8 +85,9 @@ async function fetchState() {
 }
 
 function renderState(s) {
+  const currency = s.meta.display_currency || "";
   document.getElementById("updated").textContent = `Update: ${fmtTs(s.updated_epoch)}`;
-  document.getElementById("price").textContent = `Preis: ${s.market.price}`;
+  document.getElementById("price").textContent = `Preis: ${s.market.price} ${currency}`;
 
   document.getElementById("meta").textContent = `${s.meta.pair} | Interval: ${s.meta.interval}`;
   document.getElementById("refresh").textContent = `${s.meta.refresh_seconds}`;
@@ -91,18 +97,21 @@ function renderState(s) {
   const sig = s.signal;
   setBadge(document.getElementById("action"), sig.action);
   document.getElementById("confidence").textContent = `${sig.confidence}%`;
+  document.getElementById("success").textContent = `${sig.success_chance}%`;
   document.getElementById("entry").textContent = sig.entry ?? "-";
   document.getElementById("sl").textContent = sig.stop_loss ?? "-";
   document.getElementById("tp").textContent = sig.take_profit ?? "-";
   document.getElementById("score").textContent = sig.score;
+  document.getElementById("entry-eta").textContent = fmtHours(sig.expected_entry_hours);
+  document.getElementById("tp-eta").textContent = fmtHours(sig.expected_tp_hours);
   document.getElementById("reason").textContent = sig.reason;
 
   const ind = s.indicators || {};
   document.getElementById("rsi").textContent = ind.rsi14?.toFixed?.(1) ?? "-";
-  document.getElementById("ema20").textContent = ind.ema20?.toFixed?.(3) ?? "-";
-  document.getElementById("ema50").textContent = ind.ema50?.toFixed?.(3) ?? "-";
+  document.getElementById("ema20").textContent = ind.ema20?.toFixed?.(4) ?? "-";
+  document.getElementById("ema50").textContent = ind.ema50?.toFixed?.(4) ?? "-";
   document.getElementById("macdh").textContent = ind.macd_hist?.toFixed?.(4) ?? "-";
-  document.getElementById("atr").textContent = ind.atr14?.toFixed?.(3) ?? "-";
+  document.getElementById("atr").textContent = ind.atr14?.toFixed?.(4) ?? "-";
 
   const tv = s.tradingview_ta?.recommendation;
   document.getElementById("tv").textContent = tv

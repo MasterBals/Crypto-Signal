@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-from app.config import get_settings, update_settings
+from app.config import INSTRUMENTS, get_settings, update_settings
+from app.services.db import init_db
 from app.services.state_cache import get_state, start_scheduler
+from app.services.backup import create_backup
 
 app = FastAPI(title="EUR/JPY AI Dashboard", version="1.0.0")
 
@@ -17,6 +19,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 def _startup() -> None:
+    init_db()
     start_scheduler()
 
 
@@ -45,3 +48,23 @@ def api_settings() -> JSONResponse:
 def api_update_settings(payload: dict) -> JSONResponse:
     settings = update_settings(payload)
     return JSONResponse(settings.to_dict())
+
+
+@app.get("/api/instruments", response_class=JSONResponse)
+def api_instruments() -> JSONResponse:
+    instruments = [
+        {
+            "key": key,
+            "label": value["label"],
+            "display_currency": value["display_currency"],
+        }
+        for key, value in INSTRUMENTS.items()
+    ]
+    return JSONResponse({"items": instruments})
+
+
+@app.get("/api/backup", response_class=FileResponse)
+def api_backup() -> FileResponse:
+    backup_path = create_backup()
+    filename = backup_path.name
+    return FileResponse(path=str(backup_path), filename=filename)

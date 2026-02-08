@@ -4,3 +4,5 @@ __pycache__/
 .env
 .venv/
 data/settings.json
+data/market.db
+data/backups/

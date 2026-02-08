@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 import json
 import os
 from typing import Any
@@ -6,10 +6,77 @@ from typing import Any
 
 DEFAULT_SETTINGS_PATH = os.getenv("SETTINGS_PATH", "/app/data/settings.json")
 
+INSTRUMENTS: dict[str, dict[str, Any]] = {
+    "EURJPY": {
+        "label": "EUR/JPY",
+        "symbol": "EURJPY=X",
+        "conversion_symbol": "USDJPY=X",
+        "display_currency": "USD",
+        "news_keywords": [
+            "eur",
+            "euro",
+            "ecb",
+            "jpy",
+            "yen",
+            "japan",
+            "boj",
+            "rate",
+            "rates",
+            "inflation",
+            "cpi",
+            "gdp",
+            "bond",
+            "yield",
+            "central bank",
+            "interest",
+            "hawkish",
+            "dovish",
+            "policy",
+            "fx",
+            "forex",
+        ],
+    },
+    "ETHUSD": {
+        "label": "ETH/USD",
+        "symbol": "ETH-USD",
+        "conversion_symbol": None,
+        "display_currency": "USD",
+        "news_keywords": [
+            "eth",
+            "ethereum",
+            "crypto",
+            "cryptocurrency",
+            "defi",
+            "staking",
+            "layer 2",
+            "layer2",
+            "l2",
+            "gas fee",
+            "ethereum foundation",
+        ],
+    },
+    "BTCUSD": {
+        "label": "BTC/USD",
+        "symbol": "BTC-USD",
+        "conversion_symbol": None,
+        "display_currency": "USD",
+        "news_keywords": [
+            "btc",
+            "bitcoin",
+            "crypto",
+            "cryptocurrency",
+            "halving",
+            "mining",
+            "hashrate",
+            "etf",
+        ],
+    },
+}
+
 
 @dataclass
 class Settings:
-    pair_symbol_yf: str = "EURJPY=X"
+    instrument_key: str = "EURJPY"
     tz: str = "Europe/Zurich"
 
     history_days: int = 20
@@ -29,6 +96,9 @@ class Settings:
     score_buy: float = 0.35
     score_sell: float = -0.35
 
+    entry_horizon_hours: float = 2.0
+    tp_horizon_hours: float = 12.0
+
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["rss_urls"] = list(self.rss_urls)
@@ -36,7 +106,8 @@ class Settings:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Settings":
-        payload = dict(data)
+        field_names = {field.name for field in fields(cls)}
+        payload = {k: v for k, v in dict(data).items() if k in field_names}
         if "rss_urls" in payload and isinstance(payload["rss_urls"], list):
             payload["rss_urls"] = tuple(payload["rss_urls"])
         return cls(**payload)
@@ -71,3 +142,7 @@ def get_settings() -> Settings:
 
 
 settings = load_settings()
+
+
+def get_instrument() -> dict[str, Any]:
+    return INSTRUMENTS.get(settings.instrument_key, INSTRUMENTS["EURJPY"])

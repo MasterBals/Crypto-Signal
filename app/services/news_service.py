@@ -7,7 +7,7 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 
-from app.config import settings
+from app.config import get_instrument, settings
 from app.services.sentiment import vader_compound
 
 
@@ -35,32 +35,9 @@ def _fetch_rss(url: str, timeout: int = 10) -> list[dict[str, Any]]:
     return items
 
 
-def _is_relevant(title: str) -> bool:
+def _is_relevant(title: str, keywords: list[str]) -> bool:
     t = title.lower()
-    keys = [
-        "eur",
-        "euro",
-        "ecb",
-        "jpy",
-        "yen",
-        "japan",
-        "boj",
-        "rate",
-        "rates",
-        "inflation",
-        "cpi",
-        "gdp",
-        "bond",
-        "yield",
-        "central bank",
-        "interest",
-        "hawkish",
-        "dovish",
-        "policy",
-        "fx",
-        "forex",
-    ]
-    return any(k in t for k in keys)
+    return any(k in t for k in keywords)
 
 
 def get_news_sentiment(max_items: int = 12) -> tuple[float, list[NewsItem]]:
@@ -71,6 +48,8 @@ def get_news_sentiment(max_items: int = 12) -> tuple[float, list[NewsItem]]:
     """
     items: list[NewsItem] = []
     sentiments: list[float] = []
+    instrument = get_instrument()
+    keywords = instrument.get("news_keywords", [])
 
     for url in settings.rss_urls:
         try:
@@ -78,7 +57,7 @@ def get_news_sentiment(max_items: int = 12) -> tuple[float, list[NewsItem]]:
             src = url.split("/")[2] if "://" in url else url
             for it in raw:
                 title = it.get("title", "")
-                if not title or not _is_relevant(title):
+                if not title or not _is_relevant(title, keywords):
                     continue
                 s = vader_compound(title)
                 items.append(NewsItem(title=title, link=it.get("link", ""), source=src, sentiment=s))
