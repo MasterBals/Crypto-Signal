@@ -1,20 +1,25 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
 
-from app.config import INSTRUMENTS, get_settings, update_settings
+from app.config import list_instruments, save_settings, settings
+from app.services.backup import create_backup
 from app.services.db import init_db
 from app.services.state_cache import get_state, start_scheduler
-from app.services.backup import create_backup
 
-app = FastAPI(title="EUR/JPY AI Dashboard", version="1.0.0")
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
+app = FastAPI(title="EUR/JPY AI Dashboard")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 @app.on_event("startup")
@@ -33,38 +38,35 @@ def config_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("config.html", {"request": request})
 
 
-@app.get("/api/state", response_class=JSONResponse)
+@app.get("/api/state")
 def api_state() -> JSONResponse:
     return JSONResponse(get_state())
 
 
-@app.get("/api/settings", response_class=JSONResponse)
-def api_settings() -> JSONResponse:
-    settings = get_settings()
-    return JSONResponse(settings.to_dict())
-
-
-@app.post("/api/settings", response_class=JSONResponse)
-def api_update_settings(payload: dict) -> JSONResponse:
-    settings = update_settings(payload)
-    return JSONResponse(settings.to_dict())
-
-
-@app.get("/api/instruments", response_class=JSONResponse)
+@app.get("/api/instruments")
 def api_instruments() -> JSONResponse:
-    instruments = [
-        {
-            "key": key,
-            "label": value["label"],
-            "display_currency": value["display_currency"],
-        }
-        for key, value in INSTRUMENTS.items()
-    ]
-    return JSONResponse({"items": instruments})
+    return JSONResponse({"items": list_instruments()})
 
 
-@app.get("/api/backup", response_class=FileResponse)
+@app.get("/api/settings")
+def api_settings() -> JSONResponse:
+    return JSONResponse(settings.to_dict())
+
+
+@app.post("/api/settings")
+async def api_settings_update(request: Request) -> JSONResponse:
+    payload: dict[str, Any] = await request.json()
+    updated = save_settings(payload)
+    return JSONResponse(updated.to_dict())
+
+
+@app.get("/api/backup")
 def api_backup() -> FileResponse:
     backup_path = create_backup()
-    filename = backup_path.name
-    return FileResponse(path=str(backup_path), filename=filename)
+    return FileResponse(backup_path, filename=backup_path.name, media_type="application/zip")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=False)

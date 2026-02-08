@@ -1,0 +1,35 @@
+general:
+  timezone: "Europe/Zurich"
+  symbol: "EURJPY"
+
+alphavantage:
+  api_key: "REQUIRED"
+  interval: "15min"
+  outputsize: "compact"
+
+usage_schedule:
+  weekdays: ["MO", "TU", "WE", "TH", "FR"]
+  windows:
+    - start: "06:30"
+      end: "22:00"
+
+fetch_policy:
+  auto_from_usage: true
+  jitter_seconds: 30
+  backfill_on_start: true
+
+analysis:
+  min_history_bars: 200
+  ema_periods: [20, 50, 200]
+  rsi_period: 14
+  atr_period: 14
+
+risk:
+  min_rr: 1.8
+  sl_atr_factor: 1.3
+  sl_min_pips: 12
+  max_trades_per_day: 2
+
+llm:
+  model: "llama3:8b"
+  temperature: 0.25
