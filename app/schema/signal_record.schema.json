@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["raw_hash", "feature_snapshot", "llm_input", "llm_output", "final_decision"],
+  "properties": {
+    "raw_hash": { "type": "string" },
+    "feature_snapshot": { "type": "object" },
+    "llm_input": { "type": "object" },
+    "llm_output": { "type": "object" },
+    "final_decision": { "type": "object" }
+  }
+}

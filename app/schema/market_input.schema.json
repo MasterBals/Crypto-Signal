@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "required": ["symbol", "interval", "market_state", "levels", "risk"],
+  "properties": {
+    "symbol": { "type": "string" },
+    "interval": { "type": "string" },
+    "market_state": {
+      "type": "object",
+      "required": ["trend", "rsi", "atr"],
+      "properties": {
+        "trend": { "type": "string" },
+        "rsi": { "type": "number" },
+        "atr": { "type": "number" }
+      }
+    },
+    "levels": {
+      "type": "object",
+      "properties": {
+        "support": { "type": "array", "items": { "type": "number" } },
+        "resistance": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["min_rr", "sl_atr_factor", "max_trades_per_day"]
+    }
+  }
+}
