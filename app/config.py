@@ -14,6 +14,8 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "label": "EUR/JPY",
         "symbol": "EURJPY=X",
         "display_currency": "JPY",
+        "av_from_symbol": "EUR",
+        "av_to_symbol": "JPY",
         "news_keywords": ["eur", "jpy", "yen", "euro", "boj", "ecb"],
     },
     "usdjpy": {
@@ -21,6 +23,8 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "label": "USD/JPY",
         "symbol": "JPY=X",
         "display_currency": "JPY",
+        "av_from_symbol": "USD",
+        "av_to_symbol": "JPY",
         "news_keywords": ["usd", "jpy", "yen", "boj", "fed"],
     },
     "btcusd": {
@@ -28,6 +32,7 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "label": "BTC/USD",
         "symbol": "BTC-USD",
         "display_currency": "USD",
+        "product_id": "BTC-USD",
         "news_keywords": ["bitcoin", "btc", "crypto"],
     },
 }
@@ -37,6 +42,10 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
 class Settings:
     instrument_key: str = "eurjpy"
     tz: str = "Europe/Zurich"
+    market_data_provider: str = "yahoo"
+    alphavantage_api_key: str = ""
+    finnhub_api_key: str = ""
+    polygon_api_key: str = ""
     history_days: int = 60
     candle_interval: str = "15m"
     refresh_seconds: int = 300
@@ -57,6 +66,10 @@ class Settings:
         return {
             "instrument_key": self.instrument_key,
             "tz": self.tz,
+            "market_data_provider": self.market_data_provider,
+            "alphavantage_api_key": self.alphavantage_api_key,
+            "finnhub_api_key": self.finnhub_api_key,
+            "polygon_api_key": self.polygon_api_key,
             "history_days": self.history_days,
             "candle_interval": self.candle_interval,
             "refresh_seconds": self.refresh_seconds,
@@ -91,6 +104,10 @@ def _save_settings_to_disk(payload: dict[str, Any]) -> None:
 def _apply_settings(settings: Settings, raw: dict[str, Any]) -> None:
     settings.instrument_key = raw.get("instrument_key", settings.instrument_key)
     settings.tz = raw.get("tz", settings.tz)
+    settings.market_data_provider = raw.get("market_data_provider", settings.market_data_provider)
+    settings.alphavantage_api_key = raw.get("alphavantage_api_key", settings.alphavantage_api_key)
+    settings.finnhub_api_key = raw.get("finnhub_api_key", settings.finnhub_api_key)
+    settings.polygon_api_key = raw.get("polygon_api_key", settings.polygon_api_key)
     settings.history_days = int(raw.get("history_days", settings.history_days))
     settings.candle_interval = raw.get("candle_interval", settings.candle_interval)
     settings.refresh_seconds = int(raw.get("refresh_seconds", settings.refresh_seconds))
