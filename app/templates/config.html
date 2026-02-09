@@ -33,6 +33,26 @@
             <input name="tz" placeholder="Europe/Zurich" />
           </label>
           <label>
+            <span>Marktdatenquelle</span>
+            <select name="market_data_provider">
+              <option value="yahoo">Yahoo Finance (kostenlos)</option>
+              <option value="coinbase">Coinbase Exchange (kostenlos, Krypto)</option>
+              <option value="alphavantage">Alpha Vantage (API Key)</option>
+            </select>
+          </label>
+          <label>
+            <span>Alpha Vantage API Key</span>
+            <input name="alphavantage_api_key" placeholder="Optionaler API Key" />
+          </label>
+          <label>
+            <span>Finnhub API Key</span>
+            <input name="finnhub_api_key" placeholder="Optionaler API Key" />
+          </label>
+          <label>
+            <span>Polygon.io API Key</span>
+            <input name="polygon_api_key" placeholder="Optionaler API Key" />
+          </label>
+          <label>
             <span>History (Tage)</span>
             <input type="number" min="1" max="200" name="history_days" />
           </label>
