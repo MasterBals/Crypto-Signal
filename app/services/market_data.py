@@ -59,6 +59,55 @@ def _granularity_seconds() -> int:
     return min(allowed, key=lambda x: abs(x - target))
 
 
+def _alphavantage_interval() -> str:
+    interval = settings.candle_interval
+    allowed = [1, 5, 15, 30, 60]
+    if interval.endswith("m"):
+        minutes = int(interval.replace("m", ""))
+    elif interval.endswith("h"):
+        minutes = int(interval.replace("h", "")) * 60
+    else:
+        minutes = 15
+    closest = min(allowed, key=lambda x: abs(x - minutes))
+    return f"{closest}min"
+
+
+def _download_alphavantage_fx(api_key: str, from_symbol: str, to_symbol: str) -> pd.DataFrame:
+    params = {
+        "function": "FX_INTRADAY",
+        "from_symbol": from_symbol,
+        "to_symbol": to_symbol,
+        "interval": _alphavantage_interval(),
+        "apikey": api_key,
+        "outputsize": "full",
+    }
+    response = requests.get("https://www.alphavantage.co/query", params=params, timeout=15)
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise RuntimeError("AlphaVantage liefert ein unerwartetes Antwortformat.")
+    if "Error Message" in payload or "Information" in payload:
+        raise RuntimeError(payload.get("Error Message") or payload.get("Information") or "AlphaVantage-Fehler.")
+    series_key = next((key for key in payload.keys() if key.startswith("Time Series FX")), None)
+    if not series_key:
+        raise RuntimeError("AlphaVantage liefert keine Zeitreihe.")
+    series = payload.get(series_key, {})
+    if not series:
+        raise RuntimeError("AlphaVantage liefert keine Kerzendaten.")
+    df = pd.DataFrame.from_dict(series, orient="index")
+    df.index = pd.to_datetime(df.index, utc=True)
+    df = df.rename(
+        columns={
+            "1. open": "Open",
+            "2. high": "High",
+            "3. low": "Low",
+            "4. close": "Close",
+        }
+    )
+    df = df[["Open", "High", "Low", "Close"]].astype(float)
+    return df.sort_index()
+
+
 def _download_coinbase(product_id: str) -> pd.DataFrame:
     granularity = _granularity_seconds()
     end = pd.Timestamp.utcnow()
@@ -101,11 +150,18 @@ def get_candles() -> pd.DataFrame:
     instrument = get_instrument()
     symbol_label = instrument["symbol"]
     since_ts = int((pd.Timestamp.utcnow() - pd.Timedelta(days=settings.history_days)).timestamp())
+    provider = settings.market_data_provider
+    base_df: pd.DataFrame | None = None
 
     try:
-        if instrument.get("source") == "coinbase":
+        if provider == "alphavantage" and settings.alphavantage_api_key:
+            from_symbol = instrument.get("av_from_symbol")
+            to_symbol = instrument.get("av_to_symbol")
+            if from_symbol and to_symbol:
+                base_df = _download_alphavantage_fx(settings.alphavantage_api_key, from_symbol, to_symbol)
+        if base_df is None and provider == "coinbase" and instrument.get("product_id"):
             base_df = _download_coinbase(instrument["product_id"])
-        else:
+        if base_df is None:
             base_df = _download(instrument["symbol"])
             conversion_symbol = instrument.get("conversion_symbol")
             if instrument["display_currency"].upper() == "USD" and conversion_symbol:
