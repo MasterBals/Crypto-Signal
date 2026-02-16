@@ -1,8 +1,8 @@
 __pycache__/
 *.pyc
-.pytest_cache/
 .env
 .venv/
-data/settings.json
-data/market.db
-data/backups/
+node_modules/
+dist/
+*.log
+.DS_Store

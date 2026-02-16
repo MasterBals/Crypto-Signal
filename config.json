@@ -1,0 +1,9 @@
+{
+  "symbol": "EURJPY",
+  "risk_per_trade": 1,
+  "min_ai_probability": 0.72,
+  "min_rr": 2.2,
+  "analysis_interval_minutes": 5,
+  "session_filter": true,
+  "timeframes": ["H4", "H1", "M15"]
+}
