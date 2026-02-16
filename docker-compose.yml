@@ -1,35 +1,6 @@
+name: eurjpy-institutional-analyst
+
 services:
-  backend-core:
-    build:
-      context: .
-      dockerfile: backend-core/Dockerfile
-    environment:
-      ANALYSIS_MODE_ONLY: "true"
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/eurjpy
-      AI_ENGINE_URL: http://ai-engine:8001
-    depends_on:
-      - postgres
-      - redis
-      - ai-engine
-    ports:
-      - "8000:8000"
-
-  ai-engine:
-    build:
-      context: .
-      dockerfile: ai-engine/Dockerfile
-    ports:
-      - "8001:8001"
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    depends_on:
-      - backend-core
-    ports:
-      - "5173:5173"
-
   postgres:
     image: postgres:16
     environment:
@@ -40,18 +11,74 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eurjpy"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ai-engine:
+    build:
+      context: .
+      dockerfile: ai-engine/Dockerfile
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  backend-core:
+    build:
+      context: .
+      dockerfile: backend-core/Dockerfile
+    environment:
+      ANALYSIS_MODE_ONLY: "true"
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/eurjpy
+      AI_ENGINE_URL: http://ai-engine:8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-engine:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
 
   scheduler:
     build:
       context: .
       dockerfile: scheduler/Dockerfile
     depends_on:
-      - backend-core
+      backend-core:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      backend-core:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
 
 volumes:
   pgdata:

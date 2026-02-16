@@ -1,12 +1,21 @@
 import asyncio
+import logging
 
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("scheduler")
+
 
 async def run_cycle() -> None:
-    async with httpx.AsyncClient(timeout=30) as client:
-        await client.post("http://backend-core:8000/analyze")
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post("http://backend-core:8000/analyze")
+            response.raise_for_status()
+            logger.info("Analyze cycle completed")
+    except Exception as exc:  # pragma: no cover - runtime robustness
+        logger.warning("Analyze cycle failed: %s", exc)
 
 
 async def main() -> None:

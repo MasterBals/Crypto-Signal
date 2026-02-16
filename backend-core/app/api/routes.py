@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.db.base import Base
-from app.db.session import SessionLocal, engine
+from app.db.session import SessionLocal
 from app.engine.analysis import MultiTimeframeAnalyzer
 from app.models.tables import Backtest, FeatureSnapshot, PositionsSnapshot, Signal
 from app.schemas.api import AnalyzeResponse, BacktestRequest
@@ -12,7 +11,6 @@ from app.services.market_data import synthetic_candles
 from app.services.session_filter import get_session_score
 
 router = APIRouter()
-Base.metadata.create_all(bind=engine)
 
 
 def get_db():
