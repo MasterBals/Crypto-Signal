@@ -37,3 +37,8 @@ docker compose up --build
 - Frontend: http://localhost:5173
 - Backend: http://localhost:8000/docs
 - AI Engine: http://localhost:8001/docs
+
+
+## Minimierte Runtime-Dependencies
+- AI-Engine installiert nur die tatsächlich benötigten Laufzeitpakete.
+- LightGBM-Container enthält `libgomp1`, damit der Service in Docker stabil startet.
